@@ -5,8 +5,8 @@ const Home:React.FC=()=>{
 
   return(
     <div>
+      
     <RecipeCard
-   
     imageUrl="image.png"
     title="Nome da receita salgada"
     type="salgada"
