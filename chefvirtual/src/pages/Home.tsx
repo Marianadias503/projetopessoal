@@ -1,16 +1,25 @@
+import React from "react";
+import { RecipeCard } from "../components/recipeCard";
 
+const Home:React.FC=()=>{
 
+  return(
+    <div>
+    <RecipeCard
+   
+    imageUrl="image.png"
+    title="Nome da receita salgada"
+    type="salgada"
+    
+    />
+    <RecipeCard
+    imageUrl="image.png"
+    title="Nome da receita doce"
+    type="doce"
+    
+    />
+      </div>
+  )
 
-function Home() {
-  
-    return (
-      <>
-        <h1 className="text-3xl font-bold underline text-red-500 ">
-        Home 
-      </h1>
-      </>
-    )
-  }
-  
-  export default Home
-  
+}
+export default Home
