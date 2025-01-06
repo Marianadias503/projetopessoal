@@ -1,54 +1,27 @@
-import sqlite3 from 'sqlite3';
-import { readFile } from 'fs/promises';
-import path from 'path';
+//importando o sqlite no modo verbose (esse modo permite ver informações detalhadas sobre os comandos executados)
+const sqlite3= require('sqlite3').verbose();//require permite ultilizar as bibliotecas que foram instaladas (bibliotecas externas) nop caso foi importado sqlite3(que pe usado para interagir com SQLite no node.js)
 
-// Caminho do banco de dados SQLite
-const DB_PATH = './database.db';
-
-// Caminho para o arquivo SQL (ajustado para o caminho correto)
-const SQL_FILE_PATH = 'src/create_tables.sql';
-
-
-// Definindo a conexão com o banco de dados
-const db = new sqlite3.Database(DB_PATH, (err) => {
-    if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err.message);
-        return;
+//constante para criar ou abrir o arquivo database.db e fazer a conexão com o banco de dados
+const db= new sqlite3.Database("./database.db", (err)=>{
+    if(err){
+        console.log("Erro ao conectar ao banco de dados", err.message)
+    } else {
+        console.log("conexão com banco de dados estabelecida com sucesso")
     }
-    console.log('Conexão com o banco de dados SQLite estabelecida.');
+})
 
-   
-});
+//Funçaõ para buscar os dados das receitas
 
-// Ler o conteúdo do arquivo SQL
-readFile(SQL_FILE_PATH, 'utf8')
-    .then((sql) => {
-        // Usar db.run para executar os comandos SQL
-        db.serialize(() => {
-            // Dividir os comandos SQL em uma lista e rodá-los um a um
-            const commands = sql.split(';').filter(command => command.trim() !== '');
-            
-            commands.forEach(command => {
-                db.run(command, (err) => {
-                    if (err) {
-                        console.error('Erro ao executar comando SQL:', err.message);
-                    } else {
-                        console.log('Comando executado com sucesso:', command);
-                    }
-                });
-            });
-        });
-    })
-    .catch((err) => {
-        console.error('Erro ao ler o arquivo SQL:', err.message);
-    })
-    .finally(() => {
-        // Fechar a conexão com o banco de dados
-        db.close((err) => {
-            if (err) {
-                console.error('Erro ao fechar a conexão com o banco de dados:', err.message);
-            } else {
-                console.log('Conexão com o banco de dados SQLite encerrada.');
-            }
-        });
-    });
+function getRecipes(callback){
+    //o COUNT conta quantas vezes a receita foi salva na tabela recipes_saves, e o resultado será retornado na coluna save_count, que aparece apenas no momento da consulta, é criada dinamicamente
+    //FROM define que o início da consulta será pela tabela recipes
+    const query= `
+     SELECT recipes.id, recipes.title, recipes.description, recipes.image_url,
+        COUNT(recipes_saves.id) AS save_count 
+        FROM recipes
+        
+    
+    
+    
+    `
+}
