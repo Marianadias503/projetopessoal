@@ -1,5 +1,4 @@
-import sqlite3 from "sqlite3"; 
-sqlite3.verbose(); // Habilitando o modo verbose, que é usado para dar uma descrição mais detalhada dos dados 
+const sqlite3 = require('sqlite3').verbose();;// Habilitando o modo verbose, que é usado para dar uma descrição mais detalhada dos dados 
 
 // Constante para criar ou abrir o arquivo database.db e fazer a conexão com o banco de dados
 const db = new sqlite3.Database("./database.db", (err) => {
@@ -86,6 +85,18 @@ function addRecipeSave() {
   });
 }
 
+// Função para buscar todas as receitas existentes no banco 
+function getAllRecipes(callback) {
+  const query = `SELECT * FROM recipes`;  
+  db.all(query, (err, rows) => {
+    if (err) {
+      console.log("Erro ao buscar receitas", err.message);
+    } else {
+      callback(err, rows);  
+    }
+  });
+}
+
 // Função para buscar as 6 receitas salvas
 function getRecipes(callback) {
   const query = `
@@ -116,3 +127,16 @@ getRecipes((err, recipes) => {
     console.log("Receitas encontradas:", recipes);
   }
 });
+
+// Testando a consulta de todas as receitas
+getAllRecipes((err, recipes) => {
+  if (err) {
+    console.log("Erro ao buscar todas as receitas:", err.message);
+  } else {
+    console.log("Todas as receitas:", recipes);
+  }
+});
+module.exports = {
+  getRecipes,
+  getAllRecipes,
+};
