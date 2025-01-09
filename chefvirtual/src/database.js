@@ -17,7 +17,7 @@ function createTables() {
     -- tabela de receitas 
 
     CREATE TABLE IF NOT EXISTS recipes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,          
       title TEXT NOT NULL,
       description TEXT,
       image_url TEXT
