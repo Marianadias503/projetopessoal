@@ -1,4 +1,5 @@
-import Home from "./pages/Home"
+
+import PublishRecipe from "./pages/PublishRecipe"
 
 
 
@@ -6,7 +7,7 @@ function App() {
   
   return (
     <>
-     <Home/>
+     <PublishRecipe/>
     </>
   )
 }

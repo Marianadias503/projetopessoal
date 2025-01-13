@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();;// Habilitando o modo verbose, que é usado para dar uma descrição mais detalhada dos dados 
+const sqlite3 = require("sqlite3").verbose(); // Habilitando o modo verbose, que é usado para dar uma descrição mais detalhada dos dados
 
 // Constante para criar ou abrir o arquivo database.db e fazer a conexão com o banco de dados
 const db = new sqlite3.Database("./database.db", (err) => {
@@ -12,7 +12,6 @@ const db = new sqlite3.Database("./database.db", (err) => {
 
 // Função para criar as tabelas
 function createTables() {
- 
   const createTableSQL = `
     -- tabela de receitas 
 
@@ -56,7 +55,7 @@ function createTables() {
 function addRecipe() {
   const insertRecipeQuery = `
     INSERT INTO recipes (title, description, image_url) 
-    VALUES ('Receita de Teste', 'Descrição de Teste', 'imagem.jpg');
+    VALUES ('Brigadeiro', 'Ingredientes', 'imagem.jpg');
   `;
 
   db.run(insertRecipeQuery, function (err) {
@@ -85,14 +84,14 @@ function addRecipeSave() {
   });
 }
 
-// Função para buscar todas as receitas existentes no banco 
+// Função para buscar todas as receitas existentes no banco
 function getAllRecipes(callback) {
-  const query = `SELECT * FROM recipes`;  
+  const query = `SELECT * FROM recipes`;
   db.all(query, (err, rows) => {
     if (err) {
       console.log("Erro ao buscar receitas", err.message);
     } else {
-      callback(err, rows);  
+      callback(err, rows);
     }
   });
 }
