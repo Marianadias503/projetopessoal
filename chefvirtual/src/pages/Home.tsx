@@ -1,26 +1,17 @@
-import React, { useEffect, useState } from "react";
+
 import { ButtonPublished } from "../components/ButtonPublished";
 import { RecipeCard } from "../components/recipeCard";
 import food from "../assets/food.png";
 import Logo from "../assets/logo.png";
-import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Importar o hook useNavigate
+import { useNavigate } from "react-router-dom"; 
+import { useFetchRecipes } from "../hooks/useFecthRecipes"
 
 const Home: React.FC = () => {
-  const [recipes, setRecipes] = useState<any[]>([]);
+  
   const navigate = useNavigate(); // Hook para navegação
+  const { recipes, loading, error  } = useFetchRecipes ("http://localhost:3000/");
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/")
-      .then((response) => {
-        setRecipes(response.data);
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar receitas:", error);
-      });
-  }, []);
-
+  
   // Função para navegação ao clicar no botão
   const handlePublishClick = () => {
     navigate("/publish-recipe"); // Navegar para a página de PublishRecipe

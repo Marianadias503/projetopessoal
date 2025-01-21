@@ -27,6 +27,21 @@ app.get("/receitas", (req, res) => {
     }
   });
 });
+// Rota para buscar os detalhes de uma receita específica
+app.get("/receitas/:id", (req, res) => {
+  const recipeId = parseInt(req.params.id, 10);
+
+  const query = `SELECT * FROM recipes WHERE id = ?`;
+  db.get(query, [recipeId], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: "Erro ao buscar os detalhes da receita" });
+    } else if (!row) {
+      res.status(404).json({ error: "Receita não encontrada" });
+    } else {
+      res.json(row); // Retorna os detalhes da receita
+    }
+  });
+});
 
 const PORT = 3000;
 // LISTEN inicia o servidor na porta definida, no caso 3000

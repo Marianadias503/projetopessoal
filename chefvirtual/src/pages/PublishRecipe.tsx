@@ -1,46 +1,17 @@
 import React, { useState } from "react";
 import { ButtonPublished } from "../components/ButtonPublished";
 import { useNavigate } from "react-router-dom";
+import {useRecipeData} from '../hooks/useRecipeData'
 
 const PublishRecipe: React.FC = () => {
-  // Estado para armazenar os dados da receita
-  const [recipeData, setRecipeData] = useState({
-    name: "", // Nome da receita
-    file: null as File | null, // foto/vídeo, pode aceitar arquivos como file ou null
-    ingredients: ["", "", ""], // Lista de ingredientes
-    steps: "", // Modo de preparo
-    author: "", // Autor da receita
-  });
-
-  // Função para navegação entre páginas
-  const navigate = useNavigate();
-
-  // Função para atualizar os dados do formulário
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    index?: number
-  ) => {
-    const { name, value, files } = e.target as HTMLInputElement ;
-  
-    if (name === "file" && files) {
-      // Garantir que o input seja do tipo 'file'
-      setRecipeData({ ...recipeData, file: files[0] });
-    } else if (name === "ingredient" && index !== undefined) {
-      const updatedIngredients = [...recipeData.ingredients];
-      updatedIngredients[index] = value;
-      setRecipeData({ ...recipeData, ingredients: updatedIngredients });
-    } else {
-      setRecipeData({ ...recipeData, [name]: value });
-    }
-  };
-  
-
-  // Função para publicar a receita
-  const handlePublish = () => {
+   
+    const {recipeData, handleInputChange} = useRecipeData ();
+    const navigate = useNavigate();
+    const handlePublish = () => {
     console.log("Receita publicada:", recipeData);
+    navigate("/recipes"); // Navegação após publicação
     
-    navigate("/recipes"); //navegação após publicação
-  };
+  }
 
   return (
     <div className="bg-[#E0E0E0] p-8 flex flex-col items-center justify-center">
