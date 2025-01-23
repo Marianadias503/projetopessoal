@@ -32,8 +32,15 @@ const Home: React.FC = () => {
       </div>
 
       <div className="w-50">
-        <ButtonPublished title="Publicar uma receita" color="#F05050" onClick={handlePublishClick} />
-        <ButtonPublished title="Ver mais receitas" color="#F05050" />
+        <ButtonPublished 
+         title="Publicar uma receita"
+         color="primary" 
+         onClick={handlePublishClick} />
+
+        <ButtonPublished  
+       
+        title="Ver mais receitas" 
+        color="primary" />
       </div>
     </div>
   );

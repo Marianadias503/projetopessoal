@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-//HOOK PARA BUSCAR AS 6 REEITAS MAIS SALVAS
+//HOOK PARA BUSCAR AS 6 RECEITAS MAIS SALVAS
 
 export const useFetchRecipes = (url: string) => {
   const [recipes, setRecipes] = useState<any[]>([]);

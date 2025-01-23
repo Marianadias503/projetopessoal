@@ -1,37 +1,29 @@
-import React from "react";
+import { tv } from 'tailwind-variants';
 
-interface ButtonPublishedProps {
+// Definindo a interface do botão e usando o extends React.ButtonHTMLAttributes<HTMLButtonElement>
+// para disponibilizar todas as propriedades de um componente button
+interface ButtonPublishedProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   title: string;
-  color: string; 
-  textcolor?:string;
-  position?: string; 
-  top?: string; 
-  left?: string; 
-  right?: string; 
-  bottom?: string; 
-  className?: string;
-  onClick?: () => void;
-
+  color: "primary" | "secondary";  
 }
 
-export const ButtonPublished: React.FC<ButtonPublishedProps> = ({
-  title,
-  color,
-  textcolor,
-  position,
-  top,
-  left,
-  right,
-  bottom,
-className,
-onClick,
+// Configurando o botão
+const button = tv({
+  base: 'rounded px-3 h-7 mr-5', 
+  variants: {
+    color: {
+      primary: 'bg-[#F05050]',
+      secondary: 'bg-purple-500',
+    }
+  }
+});
 
-}) => {
+// Uso do ...rest, pois quero passar para o botão apenas a color e title, caso usasse a props,
+// eu teria que passar todas as propriedades do button manualmente, pois ela pega todas as propriedades,
+// diferente do rest, que pega todas, porém exige que seja passado apenas os atributos extraídos
+export const ButtonPublished: React.FC<ButtonPublishedProps> = ({ title, color, ...rest }) => {
   return (
-    <button
-      className={`rounded px-3 h-7 mr-5 ${className} ${position} ${top} ${left} ${right} ${bottom} ${onClick}`} //estilos usando classes do tailwind 
-      style={{backgroundColor:color, color:textcolor,}}//estilos fora do tailwid, usado para valores dinâmicos
-    >
+    <button className={`${button({ color })}`} {...rest}>
       {title}
     </button>
   );
