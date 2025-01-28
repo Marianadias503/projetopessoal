@@ -55,7 +55,7 @@ function createTables() {
 function addRecipe() {
   const insertRecipeQuery = `
     INSERT INTO recipes (title, description, image_url) 
-    VALUES ('Brigadeiro', 'Ingredientes', 'imagem.jpg');
+    VALUES ('torta', 'Ingredientes', 'imagem.jpg');
   `;
 
   db.run(insertRecipeQuery, function (err) {
@@ -118,6 +118,20 @@ function getRecipes(callback) {
   });
 }
 
+//função para salvar a nova receita 
+function createRecipe(name, ingredients, instructions, callback) {
+  const query = `
+    INSERT INTO recipes (name, ingredients, instructions)
+    VALUES (?, ?, ?)
+  `;
+  db.run(query, [name, ingredients, instructions], function (err) {
+    callback(err, this); 
+  });
+}
+
+
+
+
 // Testar a inserção e consulta
 getRecipes((err, recipes) => {
   if (err) {
@@ -138,4 +152,5 @@ getAllRecipes((err, recipes) => {
 module.exports = {
   getRecipes,
   getAllRecipes,
+  createRecipe
 };

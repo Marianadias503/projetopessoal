@@ -1,7 +1,7 @@
 
 const RecipeView:React.FC = ()=>{
     return(
-        <h1>Págna de receita </h1>
+        <h1>Página de receita </h1>
     )
 }
 

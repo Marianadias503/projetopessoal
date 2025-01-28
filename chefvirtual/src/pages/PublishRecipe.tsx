@@ -11,7 +11,7 @@ const PublishRecipe: React.FC = () => {
     const handlePublish = (e: React.FormEvent) => {
         e.preventDefault(); // Usado para evitar o comportamento padrão de envio de formulário
         alert("Receita publicada: " + JSON.stringify(recipeData, null, 2)); // Conversão para string, pois estou concatenando uma string com um objeto JS
-        navigate("/recipes"); // Navegação após publicação, para página da receita pronta
+        navigate("/recipe-view," , {state:recipeData}); // Navegação após publicação, para página da receita pronta
     };
 
     return (
@@ -22,7 +22,7 @@ const PublishRecipe: React.FC = () => {
                     <input
                         className="border border-black text-center p-2 rounded-lg w-full"
                         type="text"
-                        name="title"
+                        name="name"
                         placeholder="Digite o nome da receita"
                         value={recipeData.name}
                         onChange={handleInputChange}
@@ -105,8 +105,8 @@ const PublishRecipe: React.FC = () => {
                             />
                         </span>
                         Veja o perfil clicando
-                        <a className="text-red-600" href="#">
-                            AQUI
+                        <a className="text-red-600" href="#"> 
+                             AQUI
                         </a>
                     </h3>
                 </footer>

@@ -9,7 +9,7 @@ const App: React.FC = () => {
     <Routes> {/* faz o agrupamento de todas as rotas da aplicação */}
       <Route path="/" element={<Home />} />
       <Route path="/publish-recipe" element={<PublishRecipe />} />
-      <Route path="/recipes" element={<RecipeView />} />
+      <Route path="/recipe-view" element={<RecipeView />} />
     </Routes>
   );
 };
