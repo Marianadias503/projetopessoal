@@ -14,12 +14,13 @@ const db = new sqlite3.Database("./database.db", (err) => {
 function createTables() {
   const createTableSQL = `
     -- tabela de receitas 
-
     CREATE TABLE IF NOT EXISTS recipes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,          
-      title TEXT NOT NULL,
-      description TEXT,
-      image_url TEXT
+      title TEXT NOT NULL,  -- Nome da receita
+      description TEXT,     -- ingredientes
+      steps TEXT,           -- Modo de preparo
+      image_url TEXT,       -- Foto/vídeo
+      author TEXT           -- Autor da receita
     );
     
     --tabela de receitas salvas 
@@ -40,22 +41,30 @@ function createTables() {
     );
   `;
 
+
+
+
+ 
   // Executando o script SQL para criar as tabelas
   db.exec(createTableSQL, (err) => {
     if (err) {
       console.log("Erro ao criar as tabelas:", err.message);
     } else {
       console.log("Tabelas criadas com sucesso!");
-      addRecipe(); // Após criar as tabelas, adicionar uma receita para testar
+      addRecipe(); // Após a criação das tabelas, insere uma receita de exemplo
     }
   });
 }
-
+const deleteallrecipe = (query, callback) => {
+  db.run(query, function(err) {
+    callback(err);
+  });
+};
 // Função para adicionar uma receita
 function addRecipe() {
   const insertRecipeQuery = `
-    INSERT INTO recipes (title, description, image_url) 
-    VALUES ('torta', 'Ingredientes', 'imagem.jpg');
+    INSERT INTO recipes (title, description, image_url, author) 
+    VALUES ('Torta de Maçã', 'Ingredientes: maçãs, açúcar, farinha', 'imagem.jpg', 'Maria');
   `;
 
   db.run(insertRecipeQuery, function (err) {
@@ -72,7 +81,7 @@ function addRecipe() {
 function addRecipeSave() {
   const insertSaveQuery = `
     INSERT INTO recipes_saves (recipe_id, user_id) 
-    VALUES (1, 1);
+    VALUES (1, 1);  -- Usando a receita inserida (ID 1) e um usuário (ID 1)
   `;
 
   db.run(insertSaveQuery, function (err) {
@@ -96,11 +105,11 @@ function getAllRecipes(callback) {
   });
 }
 
-// Função para buscar as 6 receitas salvas
+// Função para buscar as 6 receitas mais salvas
 function getRecipes(callback) {
   const query = `
     SELECT recipes.id, recipes.title, recipes.description, recipes.image_url,
-      COUNT(recipes_saves.id) AS save_count
+    COUNT(recipes_saves.id) AS save_count
     FROM recipes
     LEFT JOIN recipes_saves ON recipes.id = recipes_saves.recipe_id
     GROUP BY recipes.id
@@ -108,7 +117,6 @@ function getRecipes(callback) {
     LIMIT 6;
   `;
 
-  // Consulta no banco de dados
   db.all(query, (err, rows) => {
     if (err) {
       console.log("Erro ao buscar receitas mais salvas", err.message);
@@ -118,20 +126,38 @@ function getRecipes(callback) {
   });
 }
 
-//função para salvar a nova receita 
-function createRecipe(name, ingredients, instructions, callback) {
-  const query = `
-    INSERT INTO recipes (name, ingredients, instructions)
-    VALUES (?, ?, ?)
-  `;
-  db.run(query, [name, ingredients, instructions], function (err) {
-    callback(err, this); 
+// Função para criar a nova receita (CREATE)
+function createRecipe(title, ingredients, steps, image_url, author, callback) {
+  const query = `INSERT INTO recipes (title, description, steps, image_url, author) VALUES (?, ?, ?, ?, ?)`;
+  db.run(query, [title, ingredients, steps, image_url, author], function (err) {
+    if (err) {
+      return callback(err, null);
+    }
+    callback(null, { id: this.lastID });//lastId, gera um novo id automaticamente quando a receita é criada 
   });
 }
 
-
-
-
+// Função para atualizar uma receita (UPDATE)
+function updateRecipe(id, title, description, image_url, author, callback) {
+  const query = `
+    UPDATE recipes 
+    SET title = ?, description = ?, image_url = ?, author = ? 
+    WHERE id = ?
+  `;
+  db.run(query, [title, description, image_url, author, id], function (err) {
+    callback(err, this);
+  });
+}
+//Função para deletar uma receita (DELETE)
+function deleteRecipe(id, callback) {
+  const query = `
+    DELETE FROM recipes
+    WHERE id = ?
+  `;
+  db.run(query, [ id], function (err) {
+    callback(err, this);
+  });
+}
 // Testar a inserção e consulta
 getRecipes((err, recipes) => {
   if (err) {
@@ -149,8 +175,13 @@ getAllRecipes((err, recipes) => {
     console.log("Todas as receitas:", recipes);
   }
 });
+
 module.exports = {
   getRecipes,
   getAllRecipes,
-  createRecipe
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+
+  db,
 };

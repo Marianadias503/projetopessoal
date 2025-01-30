@@ -1,18 +1,42 @@
 import React from "react";
 import { ButtonPublished } from "../components/ButtonPublished";
 import { useNavigate } from "react-router-dom";
-import { useRecipeData } from '../hooks/useRecipeData';
+import { useRecipeData } from "../hooks/useRecipeData";
+import { saveRecipe } from "../hooks/useSaveRecipeBd";
+
 
 const PublishRecipe: React.FC = () => {
-    const { recipeData, handleInputChange } = useRecipeData();
-    const navigate = useNavigate();
+  const { recipeData, setRecipeData, handleInputChange } = useRecipeData();
+  const navigate = useNavigate();
 
-    // Função que vai lidar com o envio do meu formulário 
-    const handlePublish = (e: React.FormEvent) => {
-        e.preventDefault(); // Usado para evitar o comportamento padrão de envio de formulário
-        alert("Receita publicada: " + JSON.stringify(recipeData, null, 2)); // Conversão para string, pois estou concatenando uma string com um objeto JS
-        navigate("/recipe-view," , {state:recipeData}); // Navegação após publicação, para página da receita pronta
-    };
+  //FUNÇÃO PARA TRABALHAR COM O ENVIO DO FORMULÁRIO 
+  const handlePublish = (e: React.FormEvent) => { // o parâmetro E é um eventto que recebe o tipo que indica que é um evento de envio de formulário
+    e.preventDefault(); //chama o evento e aplica nele o método preventDefault, ou seja, impede o comportamento padrão do formulário
+    alert("Receita publicada: " + JSON.stringify(recipeData, null,2)); // alerta onde vai mostrar os dados da receita, o JSON.stringfy converte o retorno da receita em uma string JSON
+    
+    saveRecipe(recipeData); console.log("Enviando receita:", recipeData);
+    navigate("/recipe-view", { state: recipeData }); //navigate vai levar o usuário para minha página 'recipe-view' e com o state, eu passo os dados da receita para essa página
+  };
+
+  //FUNÇÃO PARA ADICIONAR UM NOVO CAMPO DE INGREDIENTES
+  const addIngredientField = () => {
+    setRecipeData((prevData) => ({ //chamando o setRecipeData para atualizar o meu RecipeData, então uso o prevData que vai armazenar o estado anterior do RecipeData
+      ...prevData, //aqui estou copiando todos os dados do recipeData
+      description: [...prevData.description, ""],//atualizando o campo description, copiando todos os valores existentes e adicionando um campo vazio, para o usuário digitar
+    }));
+  };
+
+  //FUNÇÃO PARA LIDAR COM A ATUALIZAÇÃO DE INGREDIENTES
+  //uso o evento e, indicando que pode ser um evento que pode vim tanto de um input como um textArea, e passo o index, que é o que indica a posição do ingrediente alterado
+  const handleIngredientChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const { value } = e.target;//pegando o valor atual do campo de entrada
+    setRecipeData((prevData) => { //atualizando o recipeData
+      const updatedIngredients = [...prevData.description]; // pegando todos os dados do array de ingredientes atuais
+      updatedIngredients[index] = value;// aqui, eu atualizo o value com o valor do index
+      return { ...prevData, description: updatedIngredients };
+    });
+  };
+
 
     return (
         <div className="bg-[#E0E0E0] p-8 flex flex-col items-center justify-center">
@@ -22,9 +46,9 @@ const PublishRecipe: React.FC = () => {
                     <input
                         className="border border-black text-center p-2 rounded-lg w-full"
                         type="text"
-                        name="name"
+                        name="title"
                         placeholder="Digite o nome da receita"
-                        value={recipeData.name}
+                        value={recipeData.title}
                         onChange={handleInputChange}
                     />
                 </div>
@@ -44,40 +68,42 @@ const PublishRecipe: React.FC = () => {
                 </div>
 
                 {/* Lista de ingredientes */}
-                <div className="flex flex-col md:flex-row md:justify-between w-full max-w-4xl mx-auto gap-6 items-center">
-                    <div className="w-full md:w-1/2">
-                        <h3 className="bg-orange-500 text-white py-2 px-4 rounded-t-lg text-center">
-                            Ingredientes
-                        </h3>
-                        <div className="bg-white rounded-b-lg p-4">
-                            {recipeData.ingredients.map((ingredient, index) => (
-                                <input
-                                    key={index}
-                                    type="text"
-                                    placeholder={`Ingrediente ${index + 1}`}
-                                    className="w-full border border-gray-300 rounded-lg p-2 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                    name="ingredient"
-                                    value={ingredient}
-                                    onChange={(e) => handleInputChange(e, index)}
-                                />
-                            ))}
+                <div className="mb-8 w-1/2">
+                    <h3 className="mb-4 text-lg font-bold">Ingredientes</h3>
+                    {recipeData.description.map((description, index) => (
+                        <div key={index} className="flex items-center mb-2">
+                            <input
+                                className="border border-gray-400 p-2 rounded-lg w-full"
+                                type="text"
+                                name={`description-${index}`}
+                                placeholder={`Ingrediente  ${index +1} `} //usei o index+1, pois o array começa smepre na posição 0, então caso seja o primeiro ingrediente, se não usasse o +1, ficaria 'ingrediente 0' 
+                                value={description}
+                                onChange={(e) => handleIngredientChange(e, index)}
+                            />
                         </div>
-                    </div>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={addIngredientField}
+                        className="mt-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
+                    >
+                        Adicionar Ingrediente
+                    </button>
+                </div>
 
-                    {/* Etapas da receita */}
-                    <div className="w-full md:w-1/2">
-                        <h3 className="bg-orange-500 text-white py-2 px-4 rounded-t-lg text-center">
-                            Etapas da Receita
-                        </h3>
-                        <div className="bg-white rounded-b-lg p-4">
-                            <textarea
-                                placeholder="Descreva o modo de preparo..."
-                                className="w-full border border-gray-300 rounded-lg p-2 h-32 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                name="steps"
-                                value={recipeData.steps}
-                                onChange={handleInputChange}
-                            ></textarea>
-                        </div>
+                {/* Etapas da receita */}
+                <div className="w-full md:w-1/2">
+                    <h3 className="bg-orange-500 text-white py-2 px-4 rounded-t-lg text-center">
+                        Etapas da Receita
+                    </h3>
+                    <div className="bg-white rounded-b-lg p-4">
+                        <textarea
+                            placeholder="Descreva o modo de preparo..."
+                            className="w-full border border-gray-300 rounded-lg p-2 h-32 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            name="steps"
+                            value={recipeData.steps}
+                            onChange={handleInputChange}
+                        ></textarea>
                     </div>
                 </div>
 
@@ -86,7 +112,7 @@ const PublishRecipe: React.FC = () => {
                     <ButtonPublished
                         title="Publicar essa receita"
                         color="primary"
-                        type="submit" // O tipo "submit" é necessário para o envio do formulário
+                        type="submit"
                     />
                 </div>
 
@@ -105,8 +131,8 @@ const PublishRecipe: React.FC = () => {
                             />
                         </span>
                         Veja o perfil clicando
-                        <a className="text-red-600" href="#"> 
-                             AQUI
+                        <a className="text-red-600" href="#">
+                            AQUI
                         </a>
                     </h3>
                 </footer>

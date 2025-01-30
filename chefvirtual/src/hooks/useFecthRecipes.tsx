@@ -26,3 +26,4 @@ export const useFetchRecipes = (url: string) => {
 
   return { recipes, loading, error };
 };
+

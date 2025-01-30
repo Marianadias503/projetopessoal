@@ -9,7 +9,7 @@ import { useFetchRecipes } from "../hooks/useFecthRecipes"
 const Home: React.FC = () => {
   
   const navigate = useNavigate(); // Hook para navegação
-  const { recipes, loading, error  } = useFetchRecipes ("http://localhost:3000/");
+  const { recipes } = useFetchRecipes ("http://localhost:3000/"); //minha url padrão
 
   
   // Função para navegação ao clicar no botão
