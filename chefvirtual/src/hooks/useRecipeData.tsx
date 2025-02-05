@@ -21,29 +21,27 @@ export const useRecipeData = () => {
 
   // Função para atualizar os dados do formulário e deixar salvo no setRecipeData
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, // Indica que é um evento do React que pode vir de um Input ou TextArea
-    index?: number // O index é usado para ajudar a identificar qual é o input que está sendo atualizado, ele é passado como parâmetro na minha div de ingredientes, é gerado pela função map quando percorre o meu array
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    index?: number
   ) => {
-    // Esses elementos serão passados pela verificação
     const { name, value, files } = e.target as HTMLInputElement;
-
+  
     if (name === "file" && files) {
       // Atualizar arquivo
       setRecipeData((prevData) => ({ ...prevData, file: files[0] }));
-    } 
-    // Se for um campo de ingredientes e o index for fornecido, irá ter uma cópia do array dos ingredientes (prevData) atuais, 
-    // depois irá pegar o ingrediente do índice fornecido, e passará a ser o novo valor no campo e será mostrado no return os ingredientes que já estavam juntamente com 
-    // o novo ingrediente atualizado
-    else if (name === "ingredient" && index !== undefined) {
+    } else if (name.startsWith("description") && index !== undefined) {
       // Atualizar ingrediente específico
       setRecipeData((prevData) => {
-        const updatedIngredients = [...prevData.description]; // faz uma cópia do array
-        updatedIngredients[index] = value; // Atualiza o valor do ingrediente no índice fornecido
-        return { ...prevData, description: updatedIngredients }; // Atualiza a chave 'description' no estado com o array convertido novamente em string
+        const updatedIngredients = [...prevData.description];
+        updatedIngredients[index] = value.trim();
+        return { ...prevData, description: updatedIngredients };
       });
     } else {
       // Atualizar os outros campos
-      setRecipeData((prevData) => ({ ...prevData, [name]: value }));
+      setRecipeData((prevData) => ({
+        ...prevData,
+        [name]: name === 'description' ? value.trim() : value,
+      }));
     }
   };
   
