@@ -3,7 +3,7 @@ import { useState } from "react";
 // Interface para tipar os dados da receita
 export interface RecipeData {
   title: string; // Nome da receita
-  file: File | null; // Foto ou vídeo
+  image_url: string | null; // Foto ou vídeo
   description: string[]; // Lista de ingredientes
   steps: string; // Modo de preparo
   author: string; // Autor
@@ -13,7 +13,7 @@ export const useRecipeData = () => {
   // Estado para armazenar os dados da receita usando o useState
   const [recipeData, setRecipeData] = useState<RecipeData>({
     title: "",
-    file: null, 
+    image_url: null, 
     description: [""], // incia com um campo de ingrediente vazio
     steps: "", 
     author: "", 
@@ -26,23 +26,19 @@ export const useRecipeData = () => {
   ) => {
     const { name, value, files } = e.target as HTMLInputElement;
   
-    if (name === "file" && files) {
-      // Atualizar arquivo
-      setRecipeData((prevData) => ({ ...prevData, file: files[0] }));
-    } else if (name.startsWith("description") && index !== undefined) {
-      // Atualizar ingrediente específico
-      setRecipeData((prevData) => {
+    setRecipeData((prevData) => {
+      if (name === "file" && files) {
+        return { ...prevData, file: files[0] };
+      } else if (name.startsWith("description") && index !== undefined) {
+        // Atualiza um ingrediente específico
         const updatedIngredients = [...prevData.description];
         updatedIngredients[index] = value.trim();
         return { ...prevData, description: updatedIngredients };
-      });
-    } else {
-      // Atualizar os outros campos
-      setRecipeData((prevData) => ({
-        ...prevData,
-        [name]: name === 'description' ? value.trim() : value,
-      }));
-    }
+      } else {
+        // Atualiza os outros campos normalmente
+        return { ...prevData, [name]: value };
+      }
+    });
   };
   
 

@@ -8,35 +8,52 @@ import { saveRecipe } from "../hooks/useSaveRecipeBd";
 const PublishRecipe: React.FC = () => {
   const { recipeData, setRecipeData, handleInputChange } = useRecipeData();
   const navigate = useNavigate();
-
-  //FUNÇÃO PARA TRABALHAR COM O ENVIO DO FORMULÁRIO 
-  const handlePublish = (e: React.FormEvent) => { // o parâmetro E é um eventto que recebe o tipo que indica que é um evento de envio de formulário
-    e.preventDefault(); //chama o evento e aplica nele o método preventDefault, ou seja, impede o comportamento padrão do formulário
-    alert("Receita publicada: " + JSON.stringify(recipeData, null,2)); // alerta onde vai mostrar os dados da receita, o JSON.stringfy converte o retorno da receita em uma string JSON
+ // FUNÇÃO PARA TRABALHAR COM O ENVIO DO FORMULÁRIO 
+ const handlePublish = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    saveRecipe(recipeData); console.log("Enviando receita:", recipeData);
-    navigate("/recipe-view", { state: recipeData }); //navigate vai levar o usuário para minha página 'recipe-view' e com o state, eu passo os dados da receita para essa página
+    // Verifique se a estrutura do recipeData está correta
+    console.log("Enviando receita:", recipeData);
+  
+    try {
+      await saveRecipe(recipeData);
+      navigate("/recipe-view", { state: recipeData });
+    } catch (error) {
+      console.error("Erro ao publicar a receita:", error);
+    }
   };
-
-  //FUNÇÃO PARA ADICIONAR UM NOVO CAMPO DE INGREDIENTES
+  
+  
+  // FUNÇÃO PARA ADICIONAR UM NOVO CAMPO DE INGREDIENTES
   const addIngredientField = () => {
-    setRecipeData((prevData) => ({ //chamando o setRecipeData para atualizar o meu RecipeData, então uso o prevData que vai armazenar o estado anterior do RecipeData
-      ...prevData, //aqui estou copiando todos os dados do recipeData
-      description: [...prevData.description, ""],//atualizando o campo description, copiando todos os valores existentes e adicionando um campo vazio, para o usuário digitar
+    setRecipeData((prevData) => ({
+      ...prevData,
+      description: [...prevData.description, ""],
     }));
   };
 
-  //FUNÇÃO PARA LIDAR COM A ATUALIZAÇÃO DE INGREDIENTES
-  //uso o evento e, indicando que pode ser um evento que pode vim tanto de um input como um textArea, e passo o index, que é o que indica a posição do ingrediente alterado
+  // FUNÇÃO PARA LIDAR COM A ATUALIZAÇÃO DE INGREDIENTES
   const handleIngredientChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const { value } = e.target;//pegando o valor atual do campo de entrada
-    setRecipeData((prevData) => { //atualizando o recipeData
-      const updatedIngredients = [...prevData.description]; // pegando todos os dados do array de ingredientes atuais
-      updatedIngredients[index] = value;// aqui, eu atualizo o value com o valor do index
+    const { value } = e.target;
+    setRecipeData((prevData) => {
+      const updatedIngredients = [...prevData.description];
+      updatedIngredients[index] = value;
       return { ...prevData, description: updatedIngredients };
     });
   };
 
+  // FUNÇÃO PARA LIDAR COM O ENVIO DO ARQUIVO
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; // Pega o primeiro arquivo
+    if (file) {
+      const imageUrl = URL.createObjectURL(file); // Cria a URL do arquivo
+      setRecipeData((prevData) => ({
+        ...prevData,
+        image_url: imageUrl, // Armazena a URL da imagem
+      }));
+    }
+  };
+  
 
     return (
         <div className="bg-[#E0E0E0] p-8 flex flex-col items-center justify-center">
@@ -53,19 +70,19 @@ const PublishRecipe: React.FC = () => {
                     />
                 </div>
 
-                {/* Compartilhamento de foto/vídeo */}
-                <div className="flex flex-col items-center mb-10 bg-gray-200 p-5 rounded-lg w-1/2">
-                    <label htmlFor="file" className="text-black mb-3 cursor-pointer">
-                        Compartilhe aqui a foto/vídeo da sua receita 📷
-                    </label>
-                    <input
-                        className="text-black"
-                        type="file"
-                        name="file"
-                        id="file"
-                        onChange={handleInputChange}
-                    />
-                </div>
+                 {/* Compartilhamento de foto/vídeo */}
+        <div className="flex flex-col items-center mb-10 bg-gray-200 p-5 rounded-lg w-1/2">
+          <label htmlFor="file" className="text-black mb-3 cursor-pointer">
+            Compartilhe aqui a foto/vídeo da sua receita 📷
+          </label>
+          <input
+            className="text-black"
+            type="file"
+            name="file"
+            id="file"
+            onChange={handleFileChange} 
+          />
+        </div>
 
                 {/* Lista de ingredientes */}
                 <div className="mb-8 w-1/2">

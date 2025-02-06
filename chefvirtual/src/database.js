@@ -1,99 +1,102 @@
-const sqlite3 = require("sqlite3").verbose(); // Habilitando o modo verbose, que é usado para dar uma descrição mais detalhada dos dados
-
-// Constante para criar ou abrir o arquivo database.db e fazer a conexão com o banco de dados
+const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("./database.db", (err) => {
   if (err) {
-    console.log("Erro ao conectar ao banco de dados", err.message);
+    console.error("Erro ao conectar ao banco de dados:", err.message);
   } else {
     console.log("Conexão com banco de dados estabelecida com sucesso");
-    createTables(); // Criar as tabelas assim que a conexão for estabelecida
+
+    createTables(() => {
+      console.log("Tabelas verificadas e prontas para uso.");
+    });
   }
 });
-//handleDeleteAllRecipes();
-// Função para criar as tabelas
-function createTables() {
-  const createTableSQL = `
-    -- tabela de receitas 
-    CREATE TABLE IF NOT EXISTS recipes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,          
-      title TEXT NOT NULL,  -- Nome da receita
-      description TEXT,     -- ingredientes
-      steps TEXT,           -- Modo de preparo
-      image_url TEXT,       -- Foto/vídeo
-      author TEXT           -- Autor da receita
-    );
-    
-    --tabela de receitas salvas 
-    CREATE TABLE IF NOT EXISTS recipes_saves (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      recipe_id INTEGER NOT NULL,
-      user_id INTEGER NOT NULL,
-      saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (recipe_id) REFERENCES recipes(id),
-      FOREIGN KEY (user_id) REFERENCES users(id)
+
+// FUNÇÃO PARA CRIAR TABELAS
+function createTables(callback) {
+  db.serialize(() => {
+    db.run(
+      `CREATE TABLE IF NOT EXISTS recipes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        steps TEXT NOT NULL,
+        author TEXT NOT NULL,
+        image_url TEXT
+      )`,
+      (err) => {
+        if (err) {
+          console.error("Erro ao criar tabela recipes:", err.message);
+        } else {
+          console.log("Tabela recipes criada/verificada com sucesso.");
+        }
+      }
     );
 
-    -- tabela de usuário 
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL
+    db.run(
+      `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL
+      )`,
+      (err) => {
+        if (err) {
+          console.error("Erro ao criar tabela users:", err.message);
+        } else {
+          console.log("Tabela users criada/verificada com sucesso.");
+        }
+      }
     );
-  `;
 
-  // Executando o script SQL para criar as tabelas
-  db.exec(createTableSQL, (err) => {
-    if (err) {
-      console.log("Erro ao criar as tabelas:", err.message);
-    } else {
-      console.log("Tabelas criadas com sucesso!");
-      addRecipe(); // Após a criação das tabelas, insere uma receita de exemplo
-    }
+    db.run(
+      `CREATE TABLE IF NOT EXISTS recipes_saves (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipe_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (recipe_id) REFERENCES recipes(id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )`,
+      (err) => {
+        if (err) {
+          console.error("Erro ao criar tabela recipes_saves:", err.message);
+        } else {
+          console.log("Tabela recipes_saves criada/verificada com sucesso.");
+        }
+      }
+    );
+
+    if (callback) callback();
   });
 }
 
-// Função para adicionar uma receita
-function addRecipe() {
-  const insertRecipeQuery = `
-    INSERT INTO recipes (title, description, image_url, author) 
-    VALUES ('Torta de Maçã', 'Ingredientes: maçãs, açúcar, farinha', 'imagem.jpg', 'Maria');
-  `;
+// Função para criar uma nova receita (CREATE)
+const createRecipe = (title, description, steps, image_url, author, callback) => {
+  if (!title || !description || !steps || !author) {
+    return callback(new Error("Todos os campos obrigatórios devem ser preenchidos."), null);
+  }
 
-  db.run(insertRecipeQuery, function (err) {
+  // Converter para string apenas se for um objeto ou array
+  const descriptionString =
+    typeof description === "object" ? JSON.stringify(description) : description;
+
+  const query = `INSERT INTO recipes (title, description, steps, image_url, author) VALUES (?, ?, ?, ?, ?)`;
+
+  db.run(query, [title, descriptionString, steps, image_url || null, author], function (err) {
     if (err) {
-      console.log("Erro ao inserir receita:", err.message);
-    } else {
-      console.log("Receita inserida com sucesso!");
-      addRecipeSave(); // Após inserir a receita, realiza o salvamento
+      return callback(err, null);
     }
+    callback(null, { id: this.lastID });
   });
-}
+};
 
-// Função para adicionar um salvamento de receita
-function addRecipeSave() {
-  const insertSaveQuery = `
-    INSERT INTO recipes_saves (recipe_id, user_id) 
-    VALUES (1, 1);  -- Usando a receita inserida (ID 1) e um usuário (ID 1)
-  `;
-
-  db.run(insertSaveQuery, function (err) {
-    if (err) {
-      console.log("Erro ao salvar receita:", err.message);
-    } else {
-      console.log("Receita salva com sucesso!");
-    }
-  });
-}
-
-// Função para buscar todas as receitas existentes no banco
+// Função para buscar todas as receitas
 function getAllRecipes(callback) {
-  const query = `SELECT * FROM recipes`;
-  db.all(query, (err, rows) => {
+  db.all("SELECT * FROM recipes", (err, rows) => {
     if (err) {
       console.log("Erro ao buscar receitas", err.message);
-    } else {
-      callback(err, rows);
+      return callback(err, null);
     }
+    callback(null, rows);
   });
 }
 
@@ -112,138 +115,43 @@ function getRecipes(callback) {
   db.all(query, (err, rows) => {
     if (err) {
       console.log("Erro ao buscar receitas mais salvas", err.message);
-    } else {
-      callback(null, rows);
+      return callback(err, null);
     }
+    callback(null, rows);
   });
 }
 
-// Função para criar a nova receita (CREATE)
-function createRecipe(title, description, steps, image_url, author, callback) {
-  // Verifica se 'description' é um array e faz o join apenas se for
-  if (Array.isArray(description)) {
-    const descriptionString = description.join(", ");
-    
-    const query = `INSERT INTO recipes (title, description, steps, image_url, author) VALUES (?, ?, ?, ?, ?)`;
-    
-    db.run(
-      query,
-      [title, descriptionString, steps, image_url, author],
-      function (err) {
-        if (err) {
-          return callback(err, null);
-        }
-        callback(null, { id: this.lastID });
-      }
-    );
-  } else {
-    callback(new Error("O campo description deve ser um array."), null);
-  }
-}
-
-
-// Função para atualizar uma receita (UPDATE)
+// Atualizar uma receita (UPDATE)
 function updateRecipe(id, title, description, image_url, author, callback) {
   const query = `
     UPDATE recipes 
     SET title = ?, description = ?, image_url = ?, author = ? 
-    WHERE id = ?
+    WHERE id = ?;
   `;
   db.run(query, [title, description, image_url, author, id], function (err) {
     callback(err, this);
   });
 }
-// Função para deletar uma receita (DELETE)
-function deleteRecipe(id, callback) {
-  const query = `
-    DELETE FROM recipes
-    WHERE id = ?
-  `;
 
-  db.run(query, [id], (err) => {
+// Deletar uma receita (DELETE)
+function deleteRecipe(id, callback) {
+  db.run("DELETE FROM recipes WHERE id = ?", [id], (err) => {
     if (err) {
       console.log("Erro ao deletar a receita:", err.message);
-      callback(err);
-    } else {
-      console.log("Receita deletada com sucesso!");
-      callback(null);
+      return callback(err);
     }
-  });
-}
-/*function handleDeleteAllRecipes() {
-  deleteAllRecipes((err) => {
-    if (err) {
-      console.log("Erro ao deletar todas as receitas:", err.message);
-    } else {
-      console.log("Todas as receitas foram deletadas com sucesso!");
-      // Você pode chamar outras funções aqui, como getAllRecipes, para verificar se as receitas foram realmente excluídas
-    }
+    console.log("Receita deletada com sucesso!");
+    callback(null);
   });
 }
 
 
-// Função para deletar todas as receitas
-function deleteAllRecipes(callback) {
-  const query = `
-    DELETE FROM recipes
-  `;
-
-  db.run(query, (err) => {
-    if (err) {
-      console.log("Erro ao deletar todas as receitas:", err.message);
-      callback(err);
-    } else {
-      console.log("Todas as receitas foram deletadas com sucesso!");
-      callback(null);
-    }
-  });
-}
-
-*/
-// Testar a inserção e consulta
-getRecipes((err, recipes) => {
-  if (err) {
-    console.log("Erro ao buscar receitas:", err.message);
-  } else {
-    console.log("Receitas encontradas:", recipes);
-  }
-});
-
-// Testando a consulta de todas as receitas
-getAllRecipes((err, recipes) => {
-  if (err) {
-    console.log("Erro ao buscar todas as receitas:", err.message);
-  } else {
-    console.log("Todas as receitas:", recipes);
-  }
-});
-
-// Função para adicionar uma receita com ingredientes como lista
-function addRecipe() {
-  const ingredients = ["maçãs", "açúcar", "farinha", "canela"];
-  const insertRecipeQuery = `
-    INSERT INTO recipes (title, description, steps, image_url, author) 
-    VALUES ('Torta de leite condesado', ?, 'Modo de preparo: 1. Misture os ingredientes. 2. Asse a torta.', 'imagem.jpg', 'Maria');
-  `;
-
-  const descriptionString = ingredients.join(", "); // Converte o array para uma string com ingredientes separados por vírgula
-
-  db.run(insertRecipeQuery, [descriptionString], function (err) {
-    if (err) {
-      console.log("Erro ao inserir receita:", err.message);
-    } else {
-      console.log("Receita inserida com sucesso!");
-      addRecipeSave(); // Após inserir a receita, realiza o salvamento
-    }
-  });
-}
-
+// Exportando funções para uso externo
 module.exports = {
   getRecipes,
   getAllRecipes,
   createRecipe,
   updateRecipe,
   deleteRecipe,
-  //deleteAllRecipes,
   db,
 };
