@@ -3,8 +3,15 @@ import { ButtonPublished } from "../components/ButtonPublished";
 import { useNavigate } from "react-router-dom";
 import { useRecipeData } from "../hooks/useRecipeData";
 import { saveRecipe } from "../hooks/useSaveRecipeBd";
+import { FaHome } from "react-icons/fa"; // Ícone de "home"
 
 const PublishRecipe: React.FC = () => {
+  
+  // Função para o usuário conseguir voltar para home 
+  const goHome = () => {
+    navigate("/"); 
+  };
+
   const { recipeData, setRecipeData, handleInputChange } = useRecipeData();
   const navigate = useNavigate();
   
@@ -42,6 +49,16 @@ const PublishRecipe: React.FC = () => {
   };
 
   return (
+    <div>
+      
+       {/* Ícone de Home */}
+        <button
+        onClick={goHome}
+        className="absolute top-4 left-4 text-3xl text-orange-500 hover:text-orange-700"
+      >
+        <FaHome />
+      </button>
+
     <div className="bg-[#E0E0E0] p-8 flex flex-col items-center justify-center">
       <form onSubmit={handlePublish} className="w-full max-w-4xl mx-auto flex flex-col items-center">
         {/* Título da receita */}
@@ -126,6 +143,7 @@ const PublishRecipe: React.FC = () => {
           </h3>
         </footer>
       </form>
+    </div>
     </div>
   );
 };

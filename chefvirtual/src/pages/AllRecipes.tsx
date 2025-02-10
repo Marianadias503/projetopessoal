@@ -2,9 +2,14 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useFetchRecipes } from "../hooks/useFecthRecipes"; 
 import Logo from "../assets/logo.png"; 
+import { FaHome } from "react-icons/fa"; // Ícone de "home"
 
 const AllRecipesPage: React.FC = () => {
 
+  // Função para o usuário conseguir voltar para home 
+  const goHome = () => {
+    navigate("/"); 
+  };
   // Usando o hook para buscar todas as receitas
   const { recipes, loading, error } = useFetchRecipes("http://localhost:3000/receitas");
   const navigate = useNavigate(); // Hook para navegação
@@ -29,6 +34,14 @@ const AllRecipesPage: React.FC = () => {
   }
 
   return (
+  <div>
+    <button
+        onClick={goHome}
+        className="absolute top-4 left-4 text-3xl text-orange-500 hover:text-orange-700"
+      >
+        <FaHome />
+      </button>
+
     <div className="flex flex-col items-center p-8">
       {/* Título  */}
       <h1 className="mb-10 text-center text-3xl">Todas as Receitas</h1>
@@ -50,6 +63,7 @@ const AllRecipesPage: React.FC = () => {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 };
