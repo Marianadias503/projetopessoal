@@ -24,12 +24,10 @@ export const useRecipeData = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     index?: number
   ) => {
-    const { name, value, files } = e.target as HTMLInputElement;
+    const { name, value } = e.target;
   
     setRecipeData((prevData) => {
-      if (name === "file" && files) {
-        return { ...prevData, file: files[0] };
-      } else if (name.startsWith("description") && index !== undefined) {
+      if (name.startsWith("description") && index !== undefined) {
         // Atualiza um ingrediente específico
         const updatedIngredients = [...prevData.description];
         updatedIngredients[index] = value.trim();
@@ -41,7 +39,6 @@ export const useRecipeData = () => {
     });
   };
   
-
   // Retornar o estado e a função para atualização
   return { recipeData, handleInputChange, setRecipeData };
 };

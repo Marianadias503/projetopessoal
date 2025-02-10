@@ -10,7 +10,6 @@ const db = new sqlite3.Database("./database.db", (err) => {
     });
   }
 });
-
 // FUNÇÃO PARA CRIAR TABELAS
 function createTables(callback) {
   db.serialize(() => {
@@ -20,8 +19,7 @@ function createTables(callback) {
         title TEXT NOT NULL,
         description TEXT NOT NULL,
         steps TEXT NOT NULL,
-        author TEXT NOT NULL,
-        image_url TEXT
+        author TEXT NOT NULL
       )`,
       (err) => {
         if (err) {
@@ -70,7 +68,7 @@ function createTables(callback) {
 }
 
 // Função para criar uma nova receita (CREATE)
-const createRecipe = (title, description, steps, image_url, author, callback) => {
+const createRecipe = (title, description, steps, author, callback) => {
   if (!title || !description || !steps || !author) {
     return callback(new Error("Todos os campos obrigatórios devem ser preenchidos."), null);
   }
@@ -79,9 +77,9 @@ const createRecipe = (title, description, steps, image_url, author, callback) =>
   const descriptionString =
     typeof description === "object" ? JSON.stringify(description) : description;
 
-  const query = `INSERT INTO recipes (title, description, steps, image_url, author) VALUES (?, ?, ?, ?, ?)`;
+  const query = `INSERT INTO recipes (title, description, steps, author) VALUES (?, ?, ?, ?)`;
 
-  db.run(query, [title, descriptionString, steps, image_url || null, author], function (err) {
+  db.run(query, [title, descriptionString, steps, author], function (err) {
     if (err) {
       return callback(err, null);
     }
@@ -103,7 +101,7 @@ function getAllRecipes(callback) {
 // Função para buscar as 6 receitas mais salvas
 function getRecipes(callback) {
   const query = `
-    SELECT recipes.id, recipes.title, recipes.description, recipes.image_url,
+    SELECT recipes.id, recipes.title, recipes.description,
     COUNT(recipes_saves.id) AS save_count
     FROM recipes
     LEFT JOIN recipes_saves ON recipes.id = recipes_saves.recipe_id
@@ -122,13 +120,13 @@ function getRecipes(callback) {
 }
 
 // Atualizar uma receita (UPDATE)
-function updateRecipe(id, title, description, image_url, author, callback) {
+function updateRecipe(id, title, description, author, callback) {
   const query = `
     UPDATE recipes 
-    SET title = ?, description = ?, image_url = ?, author = ? 
+    SET title = ?, description = ?, author = ? 
     WHERE id = ?;
   `;
-  db.run(query, [title, description, image_url, author, id], function (err) {
+  db.run(query, [title, description, author, id], function (err) {
     callback(err, this);
   });
 }
@@ -144,7 +142,6 @@ function deleteRecipe(id, callback) {
     callback(null);
   });
 }
-
 
 // Exportando funções para uso externo
 module.exports = {
