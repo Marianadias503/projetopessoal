@@ -11,7 +11,9 @@ const Home: React.FC = () => {
   const handlePublishClick = () => {
     navigate("/publish-recipe");
   };
-
+ const allRecipe = ()=>{
+  navigate("/all-recipes")
+ }
   return (
     <div className={"flex flex-col items-center justify-between min-h-screen p-0 bg-[#333333]"}>
       {/* Logo */}
@@ -35,9 +37,11 @@ const Home: React.FC = () => {
          color="primary" 
          onClick={handlePublishClick} />
 
+        
         <ButtonPublished  
          title="Ver mais receitas" 
-         color="primary" />
+         color="primary" 
+         onClick={allRecipe} />
       </div>
     </div>
   );
