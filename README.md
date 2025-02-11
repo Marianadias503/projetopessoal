@@ -22,7 +22,8 @@ Trata-se de um site onde o usuário pode:
 🔄 Em desenvolvimento...  
 
 ## 📷 Preview  
-![image](https://github.com/user-attachments/assets/f3649bd5-5212-40d0-8389-92a6a7b86e1b)
+![image](https://github.com/user-attachments/assets/493c3891-9df1-4cf3-872d-3670db376ad3)
+
 
 
 
