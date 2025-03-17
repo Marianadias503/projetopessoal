@@ -18,8 +18,6 @@ Trata-se de um site onde o usuário pode:
 - 📜 **TypeScript**
 - 🗄️ **SQLite**  
 
-## 📌 Status  
-🔄 Em desenvolvimento...  
 
 ## 📷 Preview  
 ![image](https://github.com/user-attachments/assets/493c3891-9df1-4cf3-872d-3670db376ad3)
